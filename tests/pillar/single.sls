@@ -1,0 +1,9 @@
+cassandra:
+  server:
+    enabled: true
+    name: 'cassandra'
+    bind:
+      address: 127.0.0.1
+      rpc_port: 9160
+    members:
+    - host: 127.0.0.1

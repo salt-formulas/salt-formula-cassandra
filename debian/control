@@ -1,0 +1,15 @@
+Source: salt-formula-cassandra
+Maintainer: marco <marek.celoud@tcpcloud.eu>
+Section: admin
+Priority: optional
+Build-Depends: debhelper (>= 9), salt-master, python, python-yaml
+Standards-Version: 3.9.6
+Homepage: http://www.tcpcloud.eu
+Vcs-Browser: https://github.com/tcpcloud/salt-formula-cassandra
+Vcs-Git: https://github.com/tcpcloud/salt-formula-cassandra.git
+
+Package: salt-formula-cassandra
+Architecture: all
+Depends: ${misc:Depends}, salt-master, reclass
+Description: cassandra salt formula
+ Install and configure cassandra system.

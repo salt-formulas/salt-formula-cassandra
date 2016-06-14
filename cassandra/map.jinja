@@ -1,0 +1,21 @@
+
+{%- set source_engine = salt['pillar.get']('cassandra:server:source:engine') %}
+
+{%- load_yaml as base_defaults %}
+Debian:
+  pkgs:
+  - cassandra
+  dir:
+    base: /etc/cassandra
+  services:
+  - cassandra
+RedHat:
+  pkgs:
+  - cassandra
+  dir:
+    base: /etc/cassandra
+  services:
+  - cassandra
+{%- endload %}
+
+{%- set server = salt['grains.filter_by'](base_defaults, merge=salt['pillar.get']('cassandra:server')) %}

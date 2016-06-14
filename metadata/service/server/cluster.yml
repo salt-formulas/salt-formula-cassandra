@@ -1,0 +1,20 @@
+applications:
+- cassandra
+classes:
+- service.cassandra.support
+parameters:
+  cassandra:
+    server:
+      enabled: true
+      version: 2
+      name: 'cassandra'
+      data_dirs:
+      - /var/lib/cassandra
+      bind:
+        address: ${_param:cluster_local_address}
+        rpc_port: 9160
+        port: 9042
+      members:
+      - host: ${_param:cluster_node01_address}
+      - host: ${_param:cluster_node02_address}
+      - host: ${_param:cluster_node03_address}
