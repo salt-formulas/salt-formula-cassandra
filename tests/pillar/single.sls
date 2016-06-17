@@ -1,6 +1,7 @@
 cassandra:
   server:
     enabled: true
+    version: 2
     name: 'cassandra'
     bind:
       address: 127.0.0.1
