@@ -6,7 +6,7 @@ mv /tmp/server.sls /srv/salt/pillar/server.sls
 
 salt-call --local --retcode-passthrough state.highstate
 
-{% for service in control.services %}
+{% for service in server.services %}
 service {{ service }} stop || true
 {% endfor %}
 
