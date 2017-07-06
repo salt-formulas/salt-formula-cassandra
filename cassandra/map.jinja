@@ -16,6 +16,21 @@ RedHat:
     base: /etc/cassandra
   services:
   - cassandra
+
+backup:
+  Debian:
+    pkgs:
+    - rsync
+    backup_dir: '/var/backups/cassandra'
+    cron: True
+  RedHat:
+    pkgs:
+    - rsync
+    backup_dir: '/var/backups/cassandra'
+    cron: True
+
 {%- endload %}
 
 {%- set server = salt['grains.filter_by'](base_defaults, merge=salt['pillar.get']('cassandra:server')) %}
+
+{% set backup  = salt['grains.filter_by'](base_defaults['backup'], merge=salt['pillar.get']('cassandra:backup', {}), base='backup') %}

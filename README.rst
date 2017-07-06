@@ -17,6 +17,88 @@ Single cassandra service
         enabled: true
         version: icehouse
 
+Backup client with ssh/rsync remote host
+
+.. code-block:: yaml
+
+    cassandra:
+      backup:
+        client:
+          enabled: true
+          full_backups_to_keep: 3
+          hours_before_full: 24
+          target:
+            host: cfg01
+
+  .. note:: full_backups_to_keep param states how many backup will be stored locally on cassandra client.
+            More options to relocate local backups can be done using salt-formula-backupninja.
+
+
+Backup client with local backup only
+
+.. code-block:: yaml
+
+    cassandra:
+      backup:
+        client:
+          enabled: true
+          full_backups_to_keep: 3
+          hours_before_full: 24
+
+  .. note:: full_backups_to_keep param states how many backup will be stored locally on cassandra client
+
+
+Backup server rsync
+
+.. code-block:: yaml
+
+    cassandra:
+      backup:
+        server:
+          enabled: true
+          hours_before_full: 24
+          full_backups_to_keep: 5
+          key:
+            cassandra_pub_key:
+              enabled: true
+              key: ssh_rsa
+
+Client restore from local backup:
+
+.. code-block:: yaml
+
+    cassandra:
+      backup:
+        client:
+          enabled: true
+          full_backups_to_keep: 3
+          hours_before_full: 24
+          target:
+            host: cfg01
+          restore_latest: 1
+          restore_from: local
+
+  .. note:: restore_latest param with a value of 1 means to restore db from the last full backup. 2 would mean to restore second latest full backup.
+
+Client restore from remote backup:
+
+.. code-block:: yaml
+
+    cassandra:
+      backup:
+        client:
+          enabled: true
+          full_backups_to_keep: 3
+          hours_before_full: 24
+          target:
+            host: cfg01
+          restore_latest: 1
+          restore_from: remote
+
+  .. note:: restore_latest param with a value of 1 means to restore db from the last full backup. 2 would mean to restore second latest full backup.
+
+
+
 Read more
 =========
 
