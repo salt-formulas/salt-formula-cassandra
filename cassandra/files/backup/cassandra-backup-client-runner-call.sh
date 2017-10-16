@@ -24,7 +24,8 @@
     SCRIPTDIR="/usr/local/bin"
     KEEP={{ backup.client.full_backups_to_keep }}
     HOURSFULLBACKUPLIFE={{ backup.client.hours_before_full }} # Lifetime of the latest full backup in seconds
-    RSYNCLOG=/var/log/backups/cassandra-rsync.log
+    RSYNCLOGDIR="/var/log/backups"
+    RSYNCLOG="/var/log/backups/cassandra-rsync.log"
 
 
     if [ $HOURSFULLBACKUPLIFE -gt 24 ]; then
@@ -57,8 +58,8 @@
         exit 1
     fi
 
-    if [ ! -d "$RSYNCLOG" ] && [ ! -e "$RSYNCLOG" ]; then
-        mkdir -p "$RSYNCLOG"
+    if [ ! -d "$RSYNCLOGDIR" ] && [ ! -e "$RSYNCLOG" ]; then
+        mkdir -p "$RSYNCLOGDIR"
     fi
 
     # Get local Cassandra listen address.  Should be loaded via the selected
