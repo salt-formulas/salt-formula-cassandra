@@ -1,4 +1,4 @@
-{%- from "cassandra/map.jinja" import backup with context %}
+{%- from "cassandra/map.jinja" import backup with context -%}
 #!/bin/bash
 
 # Script to erase old backups on Cassandra 'server role' node.

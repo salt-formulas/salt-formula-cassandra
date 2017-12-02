@@ -1,4 +1,4 @@
-{%- from "cassandra/map.jinja" import backup with context %}
+{%- from "cassandra/map.jinja" import backup with context -%}
 #!/bin/sh
 
 # This script is called remotely by Cassandra 'client role' node and returns appropriate backup that client will restore

@@ -1,4 +1,4 @@
-{%- from "cassandra/map.jinja" import backup with context %}
+{%- from "cassandra/map.jinja" import backup with context -%}
 #!/bin/bash
 # Script to call cassandra-backup-runner.sh in for loop to backup all keyspaces.
 # This script is also able to rsync backed up data to remote host and perform clean up on historical backups

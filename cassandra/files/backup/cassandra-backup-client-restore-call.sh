@@ -1,4 +1,4 @@
-{%- from "cassandra/map.jinja" import backup with context %}
+{%- from "cassandra/map.jinja" import backup with context -%}
 #!/bin/bash
 
 # Script is to locally prepare appropriate backup to restore from local or remote location and call client-restore script in for loop with every keyspace

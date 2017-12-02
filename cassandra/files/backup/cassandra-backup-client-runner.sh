@@ -1,4 +1,4 @@
-{%- from "cassandra/map.jinja" import backup with context %}
+{%- from "cassandra/map.jinja" import backup with context -%}
 #!/bin/bash
 # Script to backup Cassandra schema and create snapshot of keyspaces
 
