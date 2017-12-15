@@ -9,6 +9,7 @@
     PROGVER="1.0.1"
     ASFCFG="/etc/cassandra"
     DSECFG="/etc/dse/cassandra"
+    CASCFG='/etc/cassandra/cassandra.yaml'
     BACKUPDIR="{{ backup.backup_dir }}/full"
     TMPDIR="$( pwd )/${PROGNAME}.tmp${RANDOM}"
     CLITMPFILE="${TMPDIR}/cqlschema"
@@ -62,6 +63,7 @@
         mkdir -p "$RSYNCLOGDIR"
     fi
 
+    listen_address=$(/usr/local/bin/cas_get_listen_addr < $CASCFG)
     # Get local Cassandra listen address.  Should be loaded via the selected
     # cassandra.yaml file above.
     if [ -z $listen_address ]; then
