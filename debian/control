@@ -10,6 +10,6 @@ Vcs-Git: https://github.com/tcpcloud/salt-formula-cassandra.git
 
 Package: salt-formula-cassandra
 Architecture: all
-Depends: ${misc:Depends}, salt-master, reclass
+Depends: ${misc:Depends}
 Description: cassandra salt formula
  Install and configure cassandra system.
