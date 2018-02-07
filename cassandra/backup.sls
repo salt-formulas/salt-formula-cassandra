@@ -8,6 +8,13 @@ cassandra_backup_client_packages:
   pkg.installed:
   - names: {{ backup.pkgs }}
 
+cassandra_get_listen_addr_script:
+  file.managed:
+  - name: /usr/local/bin/cas_get_listen_addr
+  - source: salt://cassandra/files/backup/cas_get_listen_addr.py
+  - template: jinja
+  - mode: 555
+
 cassandra_backup_runner_script:
   file.managed:
   - name: /usr/local/bin/cassandra-backup-runner.sh
@@ -16,6 +23,7 @@ cassandra_backup_runner_script:
   - mode: 655
   - require:
     - pkg: cassandra_backup_client_packages
+    - file: cassandra_get_listen_addr_script
 
 cassandra_call_backup_runner_script:
   file.managed:
@@ -25,6 +33,7 @@ cassandra_call_backup_runner_script:
   - mode: 655
   - require:
     - pkg: cassandra_backup_client_packages
+    - file: cassandra_get_listen_addr_script
 
 cassandra_backup_dir:
   file.directory:
@@ -65,6 +74,7 @@ cassandra_backup_restore_script:
   - mode: 655
   - require:
     - pkg: cassandra_backup_client_packages
+    - file: cassandra_get_listen_addr_script
 
 cassandra_backup_call_restore_script:
   file.managed:
