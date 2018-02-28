@@ -1,0 +1,21 @@
+{%- if pillar.get('cassandra', {}).get('backup', {}).get('client') %}
+
+{%- set addresses = [] %}
+{%- set ips = salt['grains.get']("fqdn_ip4")|list %}
+{%- if ips %}
+  {%- for ip in ips %}
+    {%- if not (ip|string).startswith('127.')  %}
+    {%- do addresses.append(ip) %}
+    {%- endif %}
+  {%- endfor %}
+{%- endif %}
+{%- if addresses %}
+grain:
+  cassandra:
+    cassandra:
+      backup:
+        client:
+          addresses: {{ addresses|yaml }}
+{%- endif %}
+
+{%- endif %}
