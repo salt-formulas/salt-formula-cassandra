@@ -63,6 +63,14 @@ Backup server rsync
               enabled: true
               key: ssh_rsa
 
+Backup server without strict client restriction
+
+.. code-block:: yaml
+
+    cassandra:
+      backup:
+        restrict_clients: false
+
 Client restore from local backup:
 
 .. code-block:: yaml
