@@ -49,8 +49,24 @@ cassandra_backup_runner_cron:
 {%- if not backup.cron %}
   - commented: True
 {%- endif %}
+{%- if backup.client.backup_times is defined %}
+{%- if backup.client.backup_times.dayOfWeek is defined %}
+  - dayweek: {{ backup.client.backup_times.dayOfWeek }}
+{%- endif -%}
+{%- if backup.client.backup_times.month is defined %}
+  - month: {{ backup.client.backup_times.month }}
+{%- endif %}
+{%- if backup.client.backup_times.dayOfMonth is defined %}
+  - daymonth: {{ backup.client.backup_times.dayOfMonth }}
+{%- endif %}
+{%- if backup.client.backup_times.hour is defined %}
+  - hour: {{ backup.client.backup_times.hour }}
+{%- endif %}
+{%- if backup.client.backup_times.minute is defined %}
+  - minute: {{ backup.client.backup_times.minute }}
+{%- endif %}
+{%- elif backup.client.hours_before_incr is defined %}
   - minute: 0
-{%- if backup.client.hours_before_full is defined %}
 {%- if backup.client.hours_before_full <= 23 and backup.client.hours_before_full > 1 %}
   - hour: '*/{{ backup.client.hours_before_full }}'
 {%- elif not backup.client.hours_before_full <= 1 %}
