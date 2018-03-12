@@ -42,13 +42,12 @@ cassandra_backup_dir:
   - group: root
   - makedirs: true
 
+{%- if backup.cron %}
+
 cassandra_backup_runner_cron:
   cron.present:
   - name: /usr/local/bin/cassandra-backup-runner-call.sh
   - user: root
-{%- if not backup.cron %}
-  - commented: True
-{%- endif %}
 {%- if backup.client.backup_times is defined %}
 {%- if backup.client.backup_times.dayOfWeek is defined %}
   - dayweek: {{ backup.client.backup_times.dayOfWeek }}
@@ -79,6 +78,14 @@ cassandra_backup_runner_cron:
     - file: cassandra_backup_runner_script
     - file: cassandra_call_backup_runner_script
 
+{%- else %}
+
+cassandra_backup_runner_cron:
+  cron.absent:
+  - name: /usr/local/bin/cassandra-backup-runner-call.sh
+  - user: root
+
+{%- endif %}
 
 {%- if backup.client.restore_latest is defined %}
 
@@ -168,6 +175,13 @@ cassandra_key_{{ key.key }}:
   - require:
     - file: {{ backup.backup_dir }}/full
 
+{%- else %}
+
+cassandra_key_{{ key.key }}:
+  ssh_auth.absent:
+  - user: cassandra
+  - name: {{ key.key }}
+
 {%- endif %}
 
 {%- endfor %}
@@ -181,17 +195,25 @@ cassandra_server_script:
   - require:
     - pkg: cassandra_backup_server_packages
 
+{%- if backup.cron %}
+
 cassandra_server_cron:
   cron.present:
   - name: /usr/local/bin/cassandra-backup-runner.sh
   - user: cassandra
-{%- if not backup.cron %}
-  - commented: True
-{%- endif %}
   - minute: 0
   - hour: 2
   - require:
     - file: cassandra_server_script
+
+{%- else %}
+
+cassandra_server_cron:
+  cron.absent:
+  - name: /usr/local/bin/cassandra-backup-runner.sh
+  - user: cassandra
+
+{%- endif %}
 
 cassandra_server_call_restore_script:
   file.managed:
