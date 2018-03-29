@@ -1,0 +1,4 @@
+applications:
+- cassandra
+classes:
+- service.cassandra.support

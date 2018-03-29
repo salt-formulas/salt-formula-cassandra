@@ -145,46 +145,14 @@ cassandra_user:
     - user: cassandra_user
     - pkg: cassandra_backup_server_packages
 
-{%- for key_name, key in backup.server.key.iteritems() %}
-
-{%- if key.get('enabled', False) %}
-
-{%- set clients = [] %}
-{%- if backup.restrict_clients %}
-  {%- for node_name, node_grains in salt['mine.get']('*', 'grains.items').iteritems() %}
-    {%- if node_grains.get('cassandra', {}).get('backup', {}).get('client') %}
-    {%- set client = node_grains.get('cassandra').get('backup').get('client') %}
-      {%- if client.get('addresses') and client.get('addresses', []) is iterable %}
-        {%- for address in client.addresses %}
-          {%- do clients.append(address|string) %}
-        {%- endfor %}
-      {%- endif %}
-    {%- endif %}
-  {%- endfor %}
-{%- endif %}
-
-cassandra_key_{{ key.key }}:
-  ssh_auth.present:
+{{ backup.backup_dir }}/.ssh/authorized_keys:
+  file.managed:
   - user: cassandra
-  - name: {{ key.key }}
-  - options:
-    - no-pty
-{%- if clients %}
-    - from="{{ clients|join(',') }}"
-{%- endif %}
+  - group: cassandra
+  - template: jinja
+  - source: salt://cassandra/files/backup/authorized_keys
   - require:
     - file: {{ backup.backup_dir }}/full
-
-{%- else %}
-
-cassandra_key_{{ key.key }}:
-  ssh_auth.absent:
-  - user: cassandra
-  - name: {{ key.key }}
-
-{%- endif %}
-
-{%- endfor %}
 
 cassandra_server_script:
   file.managed:
