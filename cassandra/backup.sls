@@ -145,6 +145,14 @@ cassandra_user:
     - user: cassandra_user
     - pkg: cassandra_backup_server_packages
 
+{{ backup.backup_dir }}/.ssh:
+  file.directory:
+  - mode: 700
+  - user: cassandra
+  - group: cassandra
+  - require:
+    - user: cassandra_user
+
 {{ backup.backup_dir }}/.ssh/authorized_keys:
   file.managed:
   - user: cassandra
@@ -153,6 +161,7 @@ cassandra_user:
   - source: salt://cassandra/files/backup/authorized_keys
   - require:
     - file: {{ backup.backup_dir }}/full
+    - file: {{ backup.backup_dir }}/.ssh
 
 cassandra_server_script:
   file.managed:
