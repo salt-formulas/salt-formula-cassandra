@@ -67,21 +67,17 @@ fi
 
 echo "Restoring db from $FULLBACKUPDIR/$FULL/"
 for filename in $FULLBACKUPDIR/$FULL/*; do $SCRIPTDIR/cassandra-backup-restore.sh -f $filename; done
-RC=$?
-if [ $RC -eq 0 ]; then
-    nodetool repair
-    touch $DBALREADYRESTORED
-fi
 
 {%- else %}
 
 FULL=`find $BACKUPDIR -mindepth 1 -maxdepth 1 -type d -printf "%P\n" | sort -nr | head -{{ backup.client.restore_latest }} | tail -1`
 echo "Restoring db from $BACKUPDIR/$FULL/"
 for filename in $BACKUPDIR/$FULL/*; do $SCRIPTDIR/cassandra-backup-restore.sh -f $filename; done
-RC=$?
-if [ $RC -eq 0 ]; then
-    nodetool repair
-    touch $DBALREADYRESTORED
-fi
 
 {%- endif %}
+
+nodetool repair
+RC=$?
+if [ $RC -eq 0 ]; then
+    touch $DBALREADYRESTORED
+fi
