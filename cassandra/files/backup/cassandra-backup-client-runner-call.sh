@@ -24,7 +24,7 @@ done
     DSECFG="/etc/dse/cassandra"
     CASCFG='/etc/cassandra/cassandra.yaml'
     BACKUPDIR="{{ backup.backup_dir }}/full"
-    SERVERBACKUPDIR="{{ backup.client.target.get('backup_dir', backup.backup_dir) }}"
+    SERVERBACKUPDIR="{{ backup.client.target.get('backup_dir', backup.backup_dir) }}/full"
     TMPDIR="$( pwd )/${PROGNAME}.tmp${RANDOM}"
     CLITMPFILE="${TMPDIR}/cqlschema"
     CASIP="127.0.0.1"
