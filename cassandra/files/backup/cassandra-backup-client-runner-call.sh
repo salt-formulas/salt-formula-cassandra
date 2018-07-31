@@ -54,7 +54,7 @@ done
     function check_dependencies() {
         # Function to iterate through a list of required executables to ensure
         # they are installed and executable by the current user.
-        DEPS="awk basename cp cqlsh date dirname echo find "
+        DEPS="awk basename cp date dirname echo find "
         DEPS+="getopt grep hostname mkdir rm sed tail tar "
         for bin in $DEPS; do
             $( which $bin >/dev/null 2>&1 ) || NOTFOUND+="$bin "
@@ -91,9 +91,27 @@ done
     TIMESTAMP=$( date +"%Y%m%d%H%M%S" )
     DATESTRING=$( date )
 
+    {%- if backup.client.containers is defined %}
+    {%- for container_name in backup.client.containers %}
+
+    docker exec {{ container_name }} cqlsh $CASIP -e "DESC KEYSPACES" |perl -pe 's/\e([^\[\]]|\[.*?[a-zA-Z]|\].*?\a)//g' | sed '/^$/d' > Keyspace_name_schema.cql
+    #docker exec {{ container_name }} cqlsh 172.16.10.96 -e "DESC KEYSPACES" |perl -pe 's/\e([^\[\]]|\[.*?[a-zA-Z]|\].*?\a)//g' | sed '/^$/d' > Keyspace_name_schema.cql
+    sed 's/\"//g' Keyspace_name_schema.cql  > KEYSPACES_LIST
+    docker cp $SCRIPTDIR/cassandra-backup-runner.sh {{ container_name }}:/
+    for i in `cat KEYSPACES_LIST`; do docker exec {{ container_name }} /cassandra-backup-runner.sh -k $i -t $TIMESTAMP -d $DATESTRING; done
+    docker cp {{ container_name }}:/$BACKUPDIR/$TIMESTAMP $BACKUPDIR
+    docker exec {{ container_name }} rm -rf $BACKUPDIR/$TIMESTAMP
+
+    {%- endfor %}
+
+    {%- else %}
+
     cqlsh $CASIP -e "DESC KEYSPACES" |perl -pe 's/\e([^\[\]]|\[.*?[a-zA-Z]|\].*?\a)//g' | sed '/^$/d' > Keyspace_name_schema.cql
     sed 's/\"//g' Keyspace_name_schema.cql  > KEYSPACES_LIST
+    docker cp /usr/local/bin/cassandra-backup-runner.sh {{ container_name }}:/
     for i in `cat KEYSPACES_LIST`; do $SCRIPTDIR/cassandra-backup-runner.sh -k $i -t $TIMESTAMP -d $DATESTRING; done
+
+    {%- endif %}
 
 # rsync just the new or modified backup files
 # ---------

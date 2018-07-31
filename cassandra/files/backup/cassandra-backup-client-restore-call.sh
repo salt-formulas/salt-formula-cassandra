@@ -66,18 +66,64 @@ else
 fi
 
 echo "Restoring db from $FULLBACKUPDIR/$FULL/"
+{%- if backup.client.containers is defined %}
+{%- for container_name in backup.client.containers %}
+
+docker exec {{ container_name }} mkdir -p $FULLBACKUPDIR/$FULL/
+docker cp $SCRIPTDIR/cassandra-backup-restore.sh {{ container_name }}:/
+
+for filename in $FULLBACKUPDIR/$FULL/*; do docker cp $filename {{ container_name }}:$filename; docker exec {{ container_name }} /cassandra-backup-restore.sh -f $filename; docker exec {{ container_name }} rm -rf $filename; done
+
+{%- endfor %}
+
+{%- else %}
+
 for filename in $FULLBACKUPDIR/$FULL/*; do $SCRIPTDIR/cassandra-backup-restore.sh -f $filename; done
+
+{%- endif %}
 
 {%- else %}
 
 FULL=`find $BACKUPDIR -mindepth 1 -maxdepth 1 -type d -printf "%P\n" | sort -nr | head -{{ backup.client.restore_latest }} | tail -1`
 echo "Restoring db from $BACKUPDIR/$FULL/"
+
+{%- if backup.client.containers is defined %}
+{%- for container_name in backup.client.containers %}
+
+docker exec {{ container_name }} mkdir -p $BACKUPDIR/$FULL/
+docker cp $SCRIPTDIR/cassandra-backup-restore.sh {{ container_name }}:/
+
+for filename in $BACKUPDIR/$FULL/*; do docker cp $filename {{ container_name }}:$filename; docker exec {{ container_name }} /cassandra-backup-restore.sh -f $filename; docker exec {{ container_name }} rm -rf $filename; done
+
+{%- endfor %}
+
+{%- else %}
+
 for filename in $BACKUPDIR/$FULL/*; do $SCRIPTDIR/cassandra-backup-restore.sh -f $filename; done
 
 {%- endif %}
+
+{%- endif %}
+
+{%- if backup.client.containers is defined %}
+{%- for container_name in backup.client.containers %}
+
+docker exec {{ container_name }} nodetool repair
+RC=$?
+if [ $RC -eq 0 ]; then
+    touch $DBALREADYRESTORED
+fi
+
+{%- endfor %}
+
+{%- else %}
 
 nodetool repair
 RC=$?
 if [ $RC -eq 0 ]; then
     touch $DBALREADYRESTORED
 fi
+
+{%- endif %}
+
+

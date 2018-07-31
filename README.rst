@@ -35,6 +35,22 @@ Backup client with ssh/rsync remote host
             More options to relocate local backups can be done using salt-formula-backupninja.
 
 
+Backup client container with ssh/rsync remote host
+
+.. code-block:: yaml
+
+    cassandra:
+      backup:
+        client:
+          enabled: true
+          full_backups_to_keep: 3
+          hours_before_full: 24
+          containers:
+          - opencontrail_controller_1
+          target:
+            host: cfg01
+            home_dir: server-home-dir
+
 Backup client with local backup only
 
 .. code-block:: yaml
@@ -183,6 +199,23 @@ Client restore from remote backup:
 
   .. note:: restore_latest param with a value of 1 means to restore db from the last full backup. 2 would mean to restore second latest full backup.
 
+
+Client restore container from remote backup:
+
+.. code-block:: yaml
+
+    cassandra:
+      backup:
+        client:
+          enabled: true
+          full_backups_to_keep: 3
+          hours_before_full: 24
+          containers:
+          - opencontrail_controller_1
+          target:
+            host: cfg01
+          restore_latest: 1
+          restore_from: remote
 
 
 Read more
