@@ -95,7 +95,6 @@ done
     {%- for container_name in backup.client.containers %}
 
     docker exec {{ container_name }} cqlsh $CASIP -e "DESC KEYSPACES" |perl -pe 's/\e([^\[\]]|\[.*?[a-zA-Z]|\].*?\a)//g' | sed '/^$/d' > Keyspace_name_schema.cql
-    #docker exec {{ container_name }} cqlsh 172.16.10.96 -e "DESC KEYSPACES" |perl -pe 's/\e([^\[\]]|\[.*?[a-zA-Z]|\].*?\a)//g' | sed '/^$/d' > Keyspace_name_schema.cql
     sed 's/\"//g' Keyspace_name_schema.cql  > KEYSPACES_LIST
     docker cp $SCRIPTDIR/cassandra-backup-runner.sh {{ container_name }}:/
     for i in `cat KEYSPACES_LIST`; do docker exec {{ container_name }} /cassandra-backup-runner.sh -k $i -t $TIMESTAMP -d $DATESTRING; done
@@ -108,7 +107,6 @@ done
 
     cqlsh $CASIP -e "DESC KEYSPACES" |perl -pe 's/\e([^\[\]]|\[.*?[a-zA-Z]|\].*?\a)//g' | sed '/^$/d' > Keyspace_name_schema.cql
     sed 's/\"//g' Keyspace_name_schema.cql  > KEYSPACES_LIST
-    docker cp /usr/local/bin/cassandra-backup-runner.sh {{ container_name }}:/
     for i in `cat KEYSPACES_LIST`; do $SCRIPTDIR/cassandra-backup-runner.sh -k $i -t $TIMESTAMP -d $DATESTRING; done
 
     {%- endif %}
