@@ -28,6 +28,7 @@ done
     TMPDIR="$( pwd )/${PROGNAME}.tmp${RANDOM}"
     CLITMPFILE="${TMPDIR}/cqlschema"
     CASIP="127.0.0.1"
+    CASPORT="9042"
     JMXIP="127.0.0.1"
     HOSTNAME="$( hostname )"
     SNAPCREATE=false
@@ -77,7 +78,8 @@ done
         mkdir -p "$RSYNCLOGDIR"
     fi
 
-    listen_address=$(/usr/local/bin/cas_get_listen_addr < $CASCFG)
+    listen_address="$(python -c 'import yaml; import sys; print yaml.load(sys.stdin).get("listen_address")' < $CASCFG)"
+    cas_port="$(python -c 'import yaml; import sys; print yaml.load(sys.stdin).get("native_transport_port")' < $CASCFG)"
     # Get local Cassandra listen address.  Should be loaded via the selected
     # cassandra.yaml file above.
     if [ -z $listen_address ]; then
@@ -87,6 +89,10 @@ done
     else
         CASIP=$listen_address
     fi
+    if [ -n $cas_port ]; then
+        echo "Cassandra port set in config, native_transport_port=$cas_port"
+        CASPORT=$cas_port
+    fi
 
     TIMESTAMP=$( date +"%Y%m%d%H%M%S" )
     DATESTRING=$( date )
@@ -94,10 +100,10 @@ done
     {%- if backup.client.containers is defined %}
     {%- for container_name in backup.client.containers %}
 
-    docker exec {{ container_name }} cqlsh $CASIP -e "DESC KEYSPACES" |perl -pe 's/\e([^\[\]]|\[.*?[a-zA-Z]|\].*?\a)//g' | sed '/^$/d' > Keyspace_name_schema.cql
+    docker exec {{ container_name }} cqlsh $CASIP $CASPORT -e "DESC KEYSPACES" |perl -pe 's/\e([^\[\]]|\[.*?[a-zA-Z]|\].*?\a)//g' | sed '/^$/d' > Keyspace_name_schema.cql
     sed 's/\"//g' Keyspace_name_schema.cql  > KEYSPACES_LIST
     docker cp $SCRIPTDIR/cassandra-backup-runner.sh {{ container_name }}:/
-    for i in `cat KEYSPACES_LIST`; do docker exec {{ container_name }} /cassandra-backup-runner.sh -k $i -t $TIMESTAMP -d $DATESTRING; done
+    for i in `cat KEYSPACES_LIST`; do docker exec -e CASIP=$CASIP -e CASPORT=$CASPORT {{ container_name }} /cassandra-backup-runner.sh -k $i -t $TIMESTAMP -d $DATESTRING; done
     docker cp {{ container_name }}:/$BACKUPDIR/$TIMESTAMP $BACKUPDIR
     docker exec {{ container_name }} rm -rf $BACKUPDIR/$TIMESTAMP
 
@@ -105,9 +111,9 @@ done
 
     {%- else %}
 
-    cqlsh $CASIP -e "DESC KEYSPACES" |perl -pe 's/\e([^\[\]]|\[.*?[a-zA-Z]|\].*?\a)//g' | sed '/^$/d' > Keyspace_name_schema.cql
+    cqlsh $CASIP $CASPORT -e "DESC KEYSPACES" |perl -pe 's/\e([^\[\]]|\[.*?[a-zA-Z]|\].*?\a)//g' | sed '/^$/d' > Keyspace_name_schema.cql
     sed 's/\"//g' Keyspace_name_schema.cql  > KEYSPACES_LIST
-    for i in `cat KEYSPACES_LIST`; do $SCRIPTDIR/cassandra-backup-runner.sh -k $i -t $TIMESTAMP -d $DATESTRING; done
+    for i in `cat KEYSPACES_LIST`; do CASIP=$CASIP CASPORT=$CASPORT $SCRIPTDIR/cassandra-backup-runner.sh -k $i -t $TIMESTAMP -d $DATESTRING; done
 
     {%- endif %}
 

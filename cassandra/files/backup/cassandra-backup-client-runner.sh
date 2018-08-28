@@ -12,7 +12,6 @@
     BACKUPDIR="{{ backup.backup_dir }}/full"
     TMPDIR="$( pwd )/${PROGNAME}.tmp${RANDOM}"
     CLITMPFILE="${TMPDIR}/cqlschema"
-    CASIP="127.0.0.1"
     JMXIP="127.0.0.1"
     HOSTNAME="$( hostname )"
     SNAPCREATE=false
@@ -132,6 +131,12 @@
         exit 1
     fi
 
+    # make sure CASIP and CASPORT are passed as env variables -> fail otherwise
+    if [ -z "$CASIP" ] || [ -z "$CASPORT" ]; then
+        printf "Both env vars CASIP and CASPORT must be set\n"
+        exit 1
+    fi
+
     # Need write access to local directory to create dump file
     if [ ! -w $( pwd ) ]; then
         printf "You must have write access to the current directory $( pwd )\n"
@@ -189,17 +194,6 @@
     # Write temp command file for Cassandra CLI
     printf "desc keyspace $KEYSPACE;\n" > $CLITMPFILE
 
-    listen_address=$(/usr/local/bin/cas_get_listen_addr < $CASCFG)
-    # Get local Cassandra listen address.  Should be loaded via the selected
-    # cassandra.yaml file above.
-    if [ -z $listen_address ]; then
-        CASIP=$( hostname )
-    elif [ "$listen_address" == "0.0.0.0" ]; then
-        CASIP=127.0.0.1
-    else
-        CASIP=$listen_address
-    fi
-
     # Get local Cassandra JMX address
     # Cheating for now - this is *usually* right, but may be set to a real IP
     # in cassandra-env.sh in some environments.
@@ -252,7 +246,7 @@
     printf "$SNAPSHOT" > "$TMPDIR/$SNAPSFILE"
     printf "$HOSTNAME" > "$TMPDIR/$HOSTSFILE"
     printf "$DATESTRING" > "$TMPDIR/$DATESFILE"
-    cqlsh $CASIP -k $KEYSPACE -f $CLITMPFILE | tail -n +2 > "$TMPDIR/$SCHEMA"
+    cqlsh $CASIP $CASPORT -k $KEYSPACE -f $CLITMPFILE | tail -n +2 > "$TMPDIR/$SCHEMA"
     RC=$?
 
     mkdir -p "$BACKUPDIR/$TIMESTAMP"
